@@ -11,27 +11,26 @@ Invest2IIS — это инструмент предназначенный для
 
 ## Установка
 0. Сделайте телеграм бота и CHAT_ID для приватного общения с ботом
-1. Получите API-токен в веб-версии Тинькофф Инвестиций и номер счета (подрлбнее в главе ниже)
-2. Клонируйте репозиторий
-3. Установите пакет `pip install .` находясь внутри репозитория
+1. Получите API-токен в веб-версии [Тинькоф Инвестиции Настройки](https://www.tbank.ru/invest/settings/) -> Токены T‑Bank Invest API -> Создать токен (достаточно токена на чтение)
+2. Получите номер счета (подробнее в главе ниже)
+3. Клонируйте репозиторий и установите пакет `pip install .` находясь внутри репозитория
 4. В корень проекта добавьте `.env`-файл с переменными
-   
     ```
     TOKEN = "xxxxxx:yyyyyyy"  # Получить бота в боте @BotFather
     CHAT_ID = 12345 # ID чата в телеграм - ваш уникальный ID переписки
-    TINKOFF_TOKEN = "t.xxxxxYYYY"  # Ваш API-токен Тинькофф
+    TINKOFF_TOKEN = "t.xxxxxYYYY"  # 
     TINKOFF_ACCOUNT_ID = "12345678"       # ID счета в Тинькофф
     ```
-6. Запустите пакет `python3 main.py`
+5. Запустите пакет `python3 main.py`
 
 
 ## Получения номера счета 
 ```
 from tinkoff.invest import Client
 
-TOKEN = "ваш_токен_здесь" #API в настройках веб версии Тинькоф Инвестиции 
+TINKOFF_TOKEN = "t.xxxxxYYYY" 
 
-with Client(TOKEN) as client:
+with Client(TINKOFF_TOKEN) as client:
     # Получение списка счетов
     accounts = client.users.get_accounts()
     for account in accounts.accounts:
