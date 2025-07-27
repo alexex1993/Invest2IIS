@@ -3,7 +3,7 @@ import time
 import logging
 import telebot
 from dotenv import load_dotenv
-from invest.AccountStatus import AccountStatus
+from invest2iis.invest.AccountStatus import AccountStatus
 
 # Настройка логирования
 logging.basicConfig(

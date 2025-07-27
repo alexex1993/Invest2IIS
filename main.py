@@ -1,6 +1,6 @@
 import multiprocessing
-from bot import run_bot
-from cron import run_cron
+from invest2iis.bot.bot import run_bot
+from invest2iis.bot.cron import run_cron
 
 if __name__ == '__main__':
     # Создаем процессы для bot и cron
