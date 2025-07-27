@@ -91,7 +91,6 @@ class AccountStatus:
         """
         previous_value = self._previous_values.get("total_currencies")
         current_value = self.total_currencies
-        print(f"previous_value = {previous_value}, current_value = {current_value}")
 
         if previous_value is None:
             return False  # Нет предыдущих данных → считаем, что не изменилось

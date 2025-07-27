@@ -28,13 +28,13 @@ def run_cron():
     bot = telebot.TeleBot(TOKEN)
 
     # Создаем экземпляр AccountStatus
-    account = AccountStatus(token=TINKOFF_TOKEN, account_id=TINKOFF_ACCOUNT_ID, history_file="cron_history.json")
+    account = AccountStatus(token=TINKOFF_TOKEN, account_id=TINKOFF_ACCOUNT_ID)
 
     while True:
         try:
             if account.has_currencies_changed():
                 status_message = str(account)
-                bot.send_message(CHAT_ID, f"{status_message}", parse_mode='Markdown')
+                bot.send_message(CHAT_ID, f"❗️*Изменение доступных средств:* ❗️\n\n{status_message}", parse_mode='Markdown')
         except Exception as e:
             logger.error(f"Ошибка: {e}")
             bot.send_message(CHAT_ID,"⚠️ Произошла ошибка при получении данных")

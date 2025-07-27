@@ -33,7 +33,7 @@ def run_bot():
         """Обработчик команды /status"""
         try:
             status_message = str(account)
-            bot.send_message(CHAT_ID, f"{status_message}", parse_mode='Markdown')
+            bot.send_message(CHAT_ID, f"📊 *Текущий статус портфеля:*\n\n{status_message}", parse_mode='Markdown')
         except Exception as e:
             logger.error(f"Ошибка: {e}")
             bot.send_message(CHAT_ID, "⚠️ Произошла ошибка при получении данных")
