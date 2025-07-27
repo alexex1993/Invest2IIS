@@ -22,7 +22,7 @@ Invest2IIS — это инструмент предназначенный для
 ```
 from tinkoff.invest import Client
 
-TOKEN = "ваш_токен_здесь"
+TOKEN = "ваш_токен_здесь" #API в настройках веб версии Тинькоф Инвестиции 
 
 with Client(TOKEN) as client:
     # Получение списка счетов
