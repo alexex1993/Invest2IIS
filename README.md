@@ -1,5 +1,8 @@
 # Invest2IIS
 
+<img width="670" height="1280" alt="image" src="https://github.com/user-attachments/assets/f540ca84-ffe9-4bac-b8fe-5f213c38c3d8" />
+
+
 ## Описание
 Invest2IIS — это инструмент предназначенный для мониторинга ваших инвестиций в собственном телеграм боте. 
 
