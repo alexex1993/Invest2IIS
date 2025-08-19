@@ -3,6 +3,7 @@ import logging
 import telebot
 from dotenv import load_dotenv
 from invest2iis.invest.AccountStatus import AccountStatus
+from invest2iis.invest.Stock import Stock
 
 # Настройка логирования
 logging.basicConfig(
@@ -10,6 +11,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
 
 def run_bot():
     load_dotenv()
@@ -38,11 +40,23 @@ def run_bot():
             logger.error(f"Ошибка: {e}")
             bot.send_message(CHAT_ID, "⚠️ Произошла ошибка при получении данных")
 
+    @bot.message_handler(commands=['stocks'])
+    def handle_status(message):
+        """Обработчик команды /status"""
+        try:
+            stock_message = Stock.calculate_stock_yield()
+            bot.send_message(CHAT_ID, f"📈 Лог долгосрочных инвестиций \n```{stock_message}\n```", parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Ошибка: {e}")
+            bot.send_message(CHAT_ID, "⚠️ Произошла ошибка при получении данных")
+
+
     # Создаем кнопку меню
-    bot.set_my_commands([telebot.types.BotCommand("status", "Показать статус портфеля")])
+    bot.set_my_commands([telebot.types.BotCommand("status", "Статус портфеля"), telebot.types.BotCommand("stocks", "Акции")])
 
     logger.info("Бот запущен")
     bot.infinity_polling()
+
 
 if __name__ == "__main__":
     run_bot()

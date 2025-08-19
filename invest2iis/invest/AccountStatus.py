@@ -2,8 +2,14 @@ import time
 import json
 from pathlib import Path
 from tinkoff.invest import Client
+from datetime import datetime
+from tinkoff.invest.utils import now
 from typing import Optional, Dict, Any
+from tinkoff.invest.schemas import OperationType
 
+start_invest = datetime(2025, 7, 24)
+current_datetime = datetime.today()
+delta_days: float = (current_datetime - start_invest).days
 
 class AccountStatus:
     def __init__(self, token: str, account_id: str, cache_time: int = 60, history_file: str = "status_history.json"):
@@ -17,6 +23,9 @@ class AccountStatus:
         self._total_shares: int = None
         self._total_bonds: int = None
         self._total_etf: int = None
+        self._total_coupons: int = None
+        self._total_dividend: float = None
+        self._prc_interest_year: float = None
         self._previous_values: Optional[Dict[str, int]] = self._load_previous_values()
 
     def _load_previous_values(self) -> Dict[str, int]:
@@ -34,6 +43,8 @@ class AccountStatus:
             "total_shares": self.total_shares,
             "total_bonds": self.total_bonds,
             "total_etf": self.total_etf,
+            "total_coupons": self.total_coupons,
+            "total_dividend": self.total_dividend,
             "timestamp": time.time()
         }
         with open(self.history_file, "w") as f:
@@ -44,12 +55,39 @@ class AccountStatus:
         current_time = time.time()
         if current_time - self._last_update > self.cache_time:
             with Client(self.token) as client:
+                total_coupons: float = 0.0  # Купоны
+                total_input: float = 0.0
+                total_dividend: float = 0.0
+                operations = client.operations.get_operations(account_id=self.account_id, from_=datetime(2025, 7, 1), to=now()).operations
+                unique_op_types = set()
+
+                for operation in operations:
+                    payment = operation.payment.units + (operation.payment.nano / 1000000000.0) # Сумма операции в рублях
+                    op_type = operation.operation_type
+                    unique_op_types.add(op_type)
+                    if op_type == OperationType.OPERATION_TYPE_COUPON:
+                        total_coupons += payment
+
+                    if op_type == OperationType.OPERATION_TYPE_DIVIDEND:
+                        total_dividend += payment
+
+                    if op_type == OperationType.OPERATION_TYPE_INPUT:
+                        total_input += payment
+
                 portfolio = client.operations.get_portfolio(account_id=self.account_id)
+
+                years = float(delta_days) / 365.0
+                cagr = (float(portfolio.total_amount_portfolio.units) / total_input) ** (1.0 / float(years)) - 1.0
+                prc_interest_year = cagr * 100.0
+
                 self._total_amount = portfolio.total_amount_portfolio.units
                 self._total_currencies = portfolio.total_amount_currencies.units
                 self._total_shares = portfolio.total_amount_shares.units
                 self._total_bonds = portfolio.total_amount_bonds.units
                 self._total_etf = portfolio.total_amount_etf.units
+                self._total_coupons = round(total_coupons, 2)
+                self._total_dividend = round(total_dividend, 2)
+                self._prc_interest_year = round(prc_interest_year, 1)
             self._last_update = current_time
             self._save_current_values()  # Сохраняем новые значения
 
@@ -78,9 +116,24 @@ class AccountStatus:
         self._update_portfolio()
         return self._total_etf
 
-    def _format_value(self, value: int) -> str:
+    @property
+    def total_coupons(self) -> int:
+        self._update_portfolio()
+        return self._total_coupons
+
+    @property
+    def prc_interest_year(self) -> float:
+        self._update_portfolio()
+        return self._prc_interest_year
+
+    @property
+    def total_dividend(self) -> float:
+        self._update_portfolio()
+        return self._total_dividend
+
+    def _format_value(self, value) -> str:
         """Форматирует число (разделитель тысяч, округление до 2 знаков)."""
-        return f"*{value}*"
+        return f"*{round(value, 1):,}*".replace(",", " ")
 
     def has_currencies_changed(self) -> bool:
         """
@@ -103,9 +156,9 @@ class AccountStatus:
             return ""
         delta = current - previous
         if delta > 0:
-            return f"(+{self._format_value(delta)})"
+            return f"(+{self._format_value(round(delta,1))})"
         elif delta < 0:
-            return f"({self._format_value(delta)})"
+            return f"({self._format_value(round(delta,1))})"
         else:
             return ""
 
@@ -119,14 +172,20 @@ class AccountStatus:
             "total_shares": self.total_shares,
             "total_bonds": self.total_bonds,
             "total_etf": self.total_etf,
+            "total_coupons": self.total_coupons,
+            "total_dividend": self.total_dividend,
+            "prc_interest_year": self.prc_interest_year
         }
 
         # Формируем строку с дельтами
         lines = [
             f"Общая стоимость портфеля: {self._format_value(current_values['total_amount'])} {self._get_delta_str(current_values['total_amount'], self._previous_values.get('total_amount'))}",
+            f"Доходность годовых: {self._format_value(current_values['prc_interest_year'])}% {self._get_delta_str(current_values['prc_interest_year'], self._previous_values.get('prc_interest_year'))}",
             f"Стоимость облигаций: {self._format_value(current_values['total_bonds'])} {self._get_delta_str(current_values['total_bonds'], self._previous_values.get('total_bonds'))}",
             f"Стоимость акций: {self._format_value(current_values['total_shares'])} {self._get_delta_str(current_values['total_shares'], self._previous_values.get('total_shares'))}",
-            f"Стоимость ETF: {self._format_value(current_values['total_etf'])} {self._get_delta_str(current_values['total_etf'], self._previous_values.get('total_etf'))}",
+            f"Стоимость фондов: {self._format_value(current_values['total_etf'])} {self._get_delta_str(current_values['total_etf'], self._previous_values.get('total_etf'))}",
+            f"Купонов выплачено: {self._format_value(current_values['total_coupons'])} {self._get_delta_str(current_values['total_coupons'], self._previous_values.get('total_coupons'))}",
+            f"Дивидендов выплачено: {self._format_value(current_values['total_dividend'])} {self._get_delta_str(current_values['total_dividend'], self._previous_values.get('total_dividend'))}",
             f"Доступные денежные средства: {self._format_value(current_values['total_currencies'])} {self._get_delta_str(current_values['total_currencies'], self._previous_values.get('total_currencies'))}",
         ]
 
