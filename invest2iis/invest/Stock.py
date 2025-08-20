@@ -19,12 +19,15 @@ TOKEN = os.getenv('TINKOFF_TOKEN')
 ACCOUNT_ID = os.getenv('TINKOFF_ACCOUNT_ID')
 
 
-start_invest = datetime(2025, 7, 24)
-current_datetime = datetime.today()
-delta_days: float = (current_datetime - start_invest).days
+START_INVEST = datetime(2025, 7, 24)
 
 
 class Stock():
+    @classmethod
+    def delta_days(cls):
+        delta_days: float = (datetime.today() - START_INVEST).days
+        return delta_days
+
     @classmethod
     def calculate_stock_yield(cls):
         # Проверка ACCOUNT_ID
@@ -93,7 +96,7 @@ class Stock():
 
                 # 6. Сортировка по доходности (yield_percent) в порядке убывания
                 stock_data.sort(key=lambda x: x["daily_yield"], reverse=True)
-                all_data = f"\nДень {delta_days}.\n\n"
+                all_data = f"\nДень {cls.delta_days()}.\n\n"
                 all_data += f"{'Тикер':<7} {'Наименование':<15} {'За всё время':<10}   {'За сегодня':<10}\n"
                 all_data += "-" * 50 + "\n"
 

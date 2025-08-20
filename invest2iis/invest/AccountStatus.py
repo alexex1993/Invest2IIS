@@ -7,9 +7,8 @@ from tinkoff.invest.utils import now
 from typing import Optional, Dict, Any
 from tinkoff.invest.schemas import OperationType
 
-start_invest = datetime(2025, 7, 24)
-current_datetime = datetime.today()
-delta_days: float = (current_datetime - start_invest).days
+START_INVEST = datetime(2025, 7, 24)
+
 
 class AccountStatus:
     def __init__(self, token: str, account_id: str, cache_time: int = 60, history_file: str = "status_history.json"):
@@ -27,6 +26,11 @@ class AccountStatus:
         self._total_dividend: float = None
         self._prc_interest_year: float = None
         self._previous_values: Optional[Dict[str, int]] = self._load_previous_values()
+
+    @property
+    def delta_days(self):
+        delta_days: float = (datetime.today() - START_INVEST).days
+        return delta_days
 
     def _load_previous_values(self) -> Dict[str, int]:
         """Загружает предыдущие значения из файла, если он существует."""
@@ -76,7 +80,7 @@ class AccountStatus:
 
                 portfolio = client.operations.get_portfolio(account_id=self.account_id)
 
-                years = float(delta_days) / 365.0
+                years = float(self.delta_days) / 365.0
                 cagr = (float(portfolio.total_amount_portfolio.units) / total_input) ** (1.0 / float(years)) - 1.0
                 prc_interest_year = cagr * 100.0
 
