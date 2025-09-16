@@ -84,7 +84,7 @@ class Stock():
 
                     stock_data.append({
                         "ticker": ticker,
-                         "name": name[:15],
+                        "name": name[:15],
                         "quantity": quantity,
                         "avg_buy_price": avg_buy_price,
                         "current_price": current_price,

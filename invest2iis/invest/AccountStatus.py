@@ -24,7 +24,6 @@ class AccountStatus:
         self._total_etf: int = None
         self._total_coupons: int = None
         self._total_dividend: float = None
-        self._prc_interest_year: float = None
         self._previous_values: Optional[Dict[str, int]] = self._load_previous_values()
 
     @property
@@ -80,9 +79,9 @@ class AccountStatus:
 
                 portfolio = client.operations.get_portfolio(account_id=self.account_id)
 
-                years = float(self.delta_days) / 365.0
-                cagr = (float(portfolio.total_amount_portfolio.units) / total_input) ** (1.0 / float(years)) - 1.0
-                prc_interest_year = cagr * 100.0
+                #years = float(self.delta_days) / 365.0
+                #cagr = (float(portfolio.total_amount_portfolio.units) / total_input) ** (1.0 / float(years)) - 1.0
+                #prc_interest_year = cagr * 100.0
 
                 self._total_amount = portfolio.total_amount_portfolio.units
                 self._total_currencies = portfolio.total_amount_currencies.units
@@ -91,7 +90,6 @@ class AccountStatus:
                 self._total_etf = portfolio.total_amount_etf.units
                 self._total_coupons = round(total_coupons, 2)
                 self._total_dividend = round(total_dividend, 2)
-                self._prc_interest_year = round(prc_interest_year, 1)
             self._last_update = current_time
             self._save_current_values()  # Сохраняем новые значения
 
@@ -124,11 +122,6 @@ class AccountStatus:
     def total_coupons(self) -> int:
         self._update_portfolio()
         return self._total_coupons
-
-    @property
-    def prc_interest_year(self) -> float:
-        self._update_portfolio()
-        return self._prc_interest_year
 
     @property
     def total_dividend(self) -> float:
@@ -177,14 +170,12 @@ class AccountStatus:
             "total_bonds": self.total_bonds,
             "total_etf": self.total_etf,
             "total_coupons": self.total_coupons,
-            "total_dividend": self.total_dividend,
-            "prc_interest_year": self.prc_interest_year
+            "total_dividend": self.total_dividend
         }
 
         # Формируем строку с дельтами
         lines = [
             f"Общая стоимость портфеля: {self._format_value(current_values['total_amount'])} {self._get_delta_str(current_values['total_amount'], self._previous_values.get('total_amount'))}",
-            f"Доходность годовых: {self._format_value(current_values['prc_interest_year'])}% {self._get_delta_str(current_values['prc_interest_year'], self._previous_values.get('prc_interest_year'))}",
             f"Стоимость облигаций: {self._format_value(current_values['total_bonds'])} {self._get_delta_str(current_values['total_bonds'], self._previous_values.get('total_bonds'))}",
             f"Стоимость акций: {self._format_value(current_values['total_shares'])} {self._get_delta_str(current_values['total_shares'], self._previous_values.get('total_shares'))}",
             f"Стоимость фондов: {self._format_value(current_values['total_etf'])} {self._get_delta_str(current_values['total_etf'], self._previous_values.get('total_etf'))}",
