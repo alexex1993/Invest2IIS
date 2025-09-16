@@ -176,12 +176,12 @@ class AccountStatus:
         # Формируем строку с дельтами
         lines = [
             f"Общая стоимость портфеля: {self._format_value(current_values['total_amount'])} {self._get_delta_str(current_values['total_amount'], self._previous_values.get('total_amount'))}",
-            f"Стоимость облигаций: {self._format_value(current_values['total_bonds'])} {self._get_delta_str(current_values['total_bonds'], self._previous_values.get('total_bonds'))}",
             f"Стоимость акций: {self._format_value(current_values['total_shares'])} {self._get_delta_str(current_values['total_shares'], self._previous_values.get('total_shares'))}",
-            f"Стоимость фондов: {self._format_value(current_values['total_etf'])} {self._get_delta_str(current_values['total_etf'], self._previous_values.get('total_etf'))}",
-            f"Купонов выплачено: {self._format_value(current_values['total_coupons'])} {self._get_delta_str(current_values['total_coupons'], self._previous_values.get('total_coupons'))}",
-            f"Дивидендов выплачено: {self._format_value(current_values['total_dividend'])} {self._get_delta_str(current_values['total_dividend'], self._previous_values.get('total_dividend'))}",
             f"Доступные денежные средства: {self._format_value(current_values['total_currencies'])} {self._get_delta_str(current_values['total_currencies'], self._previous_values.get('total_currencies'))}",
+            f"Дивидендов выплачено: {self._format_value(current_values['total_dividend'])} {self._get_delta_str(current_values['total_dividend'], self._previous_values.get('total_dividend'))}",
+            f"Купонов выплачено: {self._format_value(current_values['total_coupons'])} {self._get_delta_str(current_values['total_coupons'], self._previous_values.get('total_coupons'))}",
+            f"Стоимость фондов: {self._format_value(current_values['total_etf'])} {self._get_delta_str(current_values['total_etf'], self._previous_values.get('total_etf'))}",
+            f"Стоимость облигаций: {self._format_value(current_values['total_bonds'])} {self._get_delta_str(current_values['total_bonds'], self._previous_values.get('total_bonds'))}",
         ]
 
         # Обновляем предыдущие значения для следующего сравнения
